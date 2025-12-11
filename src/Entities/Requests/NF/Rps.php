@@ -1,0 +1,1128 @@
+<?php
+
+namespace NFSPV2\Entities\Requests\NF;
+
+use NFSPV2\Constants\FieldData\RPSType;
+use NFSPV2\Constants\FieldData\Status;
+use NFSPV2\Constants\FieldData\TaxType;
+use NFSPV2\Constants\Requests\RpsEnum;
+use NFSPV2\Constants\Requests\SimpleFieldsEnum;
+use NFSPV2\Contracts\UserRequest;
+use NFSPV2\Exceptions\InvalidParam;
+use NFSPV2\Helpers\General;
+use NFSPV2\Validators\RpsValidator;
+
+class Rps implements UserRequest
+{
+    private $inscricaoPrestador;
+    private $serieRps;
+    private $numeroRps;
+    private $tipoRps;
+    private $dataEmissao;
+    private $statusRps;
+    private $tributacaoRps;
+    private $valorDeducoes;
+    private $valorPIS;
+    private $valorCOFINS;
+    private $valorINSS;
+    private $valorIR;
+    private $valorCSLL;
+    private $codigoServico;
+    private $aliquotaServicos;
+    private $issRetido;
+    private $inscricaoMunicipalTomador;
+    private $inscricaoEstadualTomador;
+    private $razaoSocialTomador;
+    private $emailTomador;
+    private $discriminacao;
+    private $cpfCnpjTomador;
+    private $cpfIntermediario;
+    private $cnpjIntermediario;
+    private $inscricaoMunicipalIntermediario;
+    private $issRetidoIntermediario;
+    private $emailIntermediario;
+    private $valorCargaTributaria;
+    private $percentualCargaTributaria;
+    private $fonteCargaTributaria;
+    private $codigoCEI;
+    private $matriculaObra;
+    private $municipioPrestacao;
+    private $valortotalRecebido;
+    private $numeroEncapsulamento;
+    private $tipoLogradouro;
+    private $logradouro;
+    private $numeroEndereco;
+    private $complementoEndereco;
+    private $bairro;
+    private $cidade;
+    private $uf;
+    private $cep;
+    private $cpf;
+    private $cnpj;
+    private $valorTotalRecebido;
+    private $valorInicialCobrado;
+    private $valorFinalCobrado;
+    private $valorMulta;
+    private $valorJuros;
+    private $valorIPI;
+    private $exigibilidadeSuspensa;
+    private $pagamentoParceladoAntecipado;
+    private $nbsField;
+    private $ncmField;
+    private $locPrestacao;
+    private $classTrib;
+    private $finNfse;
+    private $indFinal;
+    private $indOp;
+    private $tpOper;
+    private $tpEnteGov;
+    private $indDest;
+
+    public function __construct()
+    {
+        $this->setTipoRps(RPSType::RECIBO_PROVISORIO);
+        $this->setStatusRps(Status::NORMAL);
+        $this->setDataEmissao(date('Y-m-d'));
+        $this->setTributacaoRps(TaxType::IN_SP);
+        $this->setValorDeducoes(0);
+        $this->setValorFinalCobrado(0);
+        $this->setIssRetido(false);
+        $this->setSerieRps('A');
+        $this->setAliquotaServicos('0');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCnpjIntermediario()
+    {
+        return $this->cnpjIntermediario;
+    }
+
+    /**
+     * @param mixed $cnpjIntermediario
+     */
+    public function setCnpjIntermediario($cnpjIntermediario)
+    {
+        $this->cnpjIntermediario = General::regexCnpj($cnpjIntermediario);
+    }
+
+    public function toArray()
+    {
+
+        return [
+            SimpleFieldsEnum::RPS_SERIES => $this->serieRps,
+            SimpleFieldsEnum::IM_PROVIDER => $this->inscricaoPrestador,
+            SimpleFieldsEnum::RPS_NUMBER => $this->numeroRps,
+            RpsEnum::RPS_TYPE => $this->tipoRps,
+            RpsEnum::EMISSION_DATE => $this->dataEmissao,
+            RpsEnum::RPS_STATUS => $this->statusRps,
+            RpsEnum::RPS_TAX => $this->tributacaoRps,
+            RpsEnum::DEDUCTION_VALUE => $this->valorDeducoes,
+            RpsEnum::PIS_VALUE => $this->valorPIS,
+            RpsEnum::MULTA_VALUE => $this->valorPIS,
+            RpsEnum::JUROS_VALUE => $this->valorPIS,
+            RpsEnum::IPI_VALUE => $this->valorPIS,
+            RpsEnum::COFINS_VALUE => $this->valorCOFINS,
+            RpsEnum::INSS_VALUE => $this->valorINSS,
+            RpsEnum::IR_VALUE => $this->valorIR,
+            RpsEnum::CSLL_VALUE => $this->valorCSLL,
+            RpsEnum::SERVICE_CODE => $this->codigoServico,
+            RpsEnum::SERVICE_TAX => $this->aliquotaServicos,
+            RpsEnum::ISS_RETENTION => $this->issRetido,
+            RpsEnum::DISCRIMINATION => $this->discriminacao,
+            RpsEnum::CPFCNPJ_INTERMEDIARY => $this->cpfIntermediario,
+            RpsEnum::IM_INTERMEDIARY => $this->inscricaoMunicipalIntermediario,
+            RpsEnum::ISS_RETENTION_INTERMEDIARY => $this->issRetidoIntermediario,
+            RpsEnum::EMAIL_INTERMEDIARY => $this->emailIntermediario,
+            RpsEnum::TAX_VALUE_INTERMEDIARY => $this->valorCargaTributaria,
+            RpsEnum::TAX_PERCENT_INTERMEDIARY => $this->percentualCargaTributaria,
+            RpsEnum::TAX_ORIGIN => $this->fonteCargaTributaria,
+            RpsEnum::CEI_CODE => $this->codigoCEI,
+            RpsEnum::WORK_REGISTRATION => $this->matriculaObra,
+            RpsEnum::CITY_INSTALLMENT => $this->municipioPrestacao,
+            RpsEnum::TOTAL_VALUE => $this->valortotalRecebido,
+            RpsEnum::ENCAPSULATION_NUMBER => $this->numeroEncapsulamento,
+            RpsEnum::IM_TAKER => $this->inscricaoMunicipalTomador,
+            RpsEnum::IE_TAKER => $this->inscricaoEstadualTomador,
+            RpsEnum::CPFCNPJ_TAKER => $this->cpfCnpjTomador,
+            RpsEnum::CORPORATE_NAME_TAKER => $this->razaoSocialTomador,
+            RpsEnum::EMAIL_TAKER => $this->emailTomador,
+            RpsEnum::SERVICE_TOTAL_RECEIVED => $this->valorTotalRecebido,
+            RpsEnum::SERVICE_INITIAL_CHARGED => $this->valorInicialCobrado,
+            RpsEnum::SERVICE_FINAL_CHARGED => $this->valorFinalCobrado,
+            RpsEnum::EXIGIBILIDADE_SUSPENSA => $this->exigibilidadeSuspensa,
+            RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO => $this->pagamentoParceladoAntecipado,
+            RpsEnum::NBS_FIELD => $this->nbsField,
+            RpsEnum::NCM_FIELD => $this->ncmField,
+            RpsEnum::LOC_PRESTACAO => $this->locPrestacao,
+            RpsEnum::CLASS_TRIB => $this->classTrib,
+            RpsEnum::FIN_NFSE => $this->finNfse,
+            RpsEnum::IND_FINAL => $this->indFinal,
+            RpsEnum::IND_OP => $this->indOp,
+            RpsEnum::TP_OPER => $this->tpOper,
+            RpsEnum::TP_ENTE_GOV => $this->tpEnteGov,
+            RpsEnum::IND_DEST => $this->indDest,
+
+
+            SimpleFieldsEnum::TYPE_ADDRESS => $this->tipoLogradouro,
+            SimpleFieldsEnum::ADDRESS => $this->logradouro,
+            SimpleFieldsEnum::ADDRESS_NUMBER => $this->numeroEndereco,
+            SimpleFieldsEnum::ADDRESS_COMPLEMENT => $this->complementoEndereco,
+            SimpleFieldsEnum::NEIGHBORHOOD => $this->bairro,
+            SimpleFieldsEnum::CITY => $this->cidade,
+            SimpleFieldsEnum::STATE => $this->uf,
+            SimpleFieldsEnum::ZIP_CODE => $this->cep,
+            SimpleFieldsEnum::CPF => $this->cpf,
+            SimpleFieldsEnum::CNPJ => $this->cnpj,
+        ];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCpf()
+    {
+        return $this->cpf;
+    }
+
+    /**
+     * @param mixed $cpf
+     */
+    public function setCpf($cpf)
+    {
+        $this->cpf = sprintf('%011s', General::onlyNumbers($cpf));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCnpj()
+    {
+        return $this->cnpj;
+    }
+
+    /**
+     * @param mixed $cnpj
+     */
+    public function setCnpj($cnpj)
+    {
+        $this->cnpj = sprintf('%014s', General::regexCnpj($cnpj));
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getInscricaoPrestador()
+    {
+        return $this->inscricaoPrestador;
+    }
+
+    /**
+     * @param mixed $inscricaoPrestador
+     */
+    public function setInscricaoPrestador($inscricaoPrestador)
+    {
+        $this->inscricaoPrestador = sprintf('%08s', $inscricaoPrestador);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSerieRps()
+    {
+        return $this->serieRps;
+    }
+
+    /**
+     * @param mixed $serieRps
+     */
+    public function setSerieRps($serieRps)
+    {
+        $this->serieRps = substr($serieRps, 0, 5);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNumeroRps()
+    {
+        return $this->numeroRps;
+    }
+
+    /**
+     * @param mixed $numeroRps
+     */
+    public function setNumeroRps($numeroRps)
+    {
+        $this->numeroRps = General::onlyNumbers($numeroRps);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTipoRps()
+    {
+        return $this->tipoRps;
+    }
+
+    /**
+     * @param $tipoRps
+     * @throws InvalidParam
+     */
+    public function setTipoRps($tipoRps)
+    {
+        RpsValidator::validateRpsType($tipoRps);
+        $this->tipoRps = $tipoRps;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDataEmissao()
+    {
+        return $this->dataEmissao;
+    }
+
+    /**
+     * @param mixed $dataEmissao
+     */
+    public function setDataEmissao($dataEmissao)
+    {
+        $this->dataEmissao = General::filterDate($dataEmissao);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStatusRps()
+    {
+        return $this->statusRps;
+    }
+
+    /**
+     * @param $statusRps
+     * @throws InvalidParam
+     */
+    public function setStatusRps($statusRps)
+    {
+        RpsValidator::validateRpsStatus($statusRps);
+        $this->statusRps = $statusRps;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTributacaoRps()
+    {
+        return $this->tributacaoRps;
+    }
+
+    /**
+     * @param mixed $tributacaoRps
+     */
+    public function setTributacaoRps($tributacaoRps)
+    {
+        $this->tributacaoRps = substr($tributacaoRps, 0, 1);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorDeducoes()
+    {
+        return $this->valorDeducoes;
+    }
+
+    /**
+     * @param mixed $valorDeducoes
+     */
+    public function setValorDeducoes($valorDeducoes)
+    {
+        $this->valorDeducoes = General::filterMonetaryValue($valorDeducoes);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorPIS()
+    {
+        return $this->valorPIS;
+    }
+
+    /**
+     * @param mixed $valorPIS
+     */
+    public function setValorPIS($valorPIS)
+    {
+        $this->valorPIS = General::filterMonetaryValue($valorPIS);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorCOFINS()
+    {
+        return $this->valorCOFINS;
+    }
+
+    /**
+     * @param mixed $valorCOFINS
+     */
+    public function setValorCOFINS($valorCOFINS)
+    {
+        $this->valorCOFINS = General::filterMonetaryValue($valorCOFINS);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorINSS()
+    {
+        return $this->valorINSS;
+    }
+
+    /**
+     * @param mixed $valorINSS
+     */
+    public function setValorINSS($valorINSS)
+    {
+        $this->valorINSS = General::filterMonetaryValue($valorINSS);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorIR()
+    {
+        return $this->valorIR;
+    }
+
+    /**
+     * @param mixed $valorIR
+     */
+    public function setValorIR($valorIR)
+    {
+        $this->valorIR = General::filterMonetaryValue($valorIR);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorCSLL()
+    {
+        return $this->valorCSLL;
+    }
+
+    /**
+     * @param mixed $valorCSLL
+     */
+    public function setValorCSLL($valorCSLL)
+    {
+        $this->valorCSLL = General::filterMonetaryValue($valorCSLL);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCodigoServico()
+    {
+        return $this->codigoServico;
+    }
+
+    /**
+     * @param mixed $codigoServico
+     */
+    public function setCodigoServico($codigoServico)
+    {
+        $this->codigoServico = $codigoServico;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAliquotaServicos()
+    {
+        return $this->aliquotaServicos;
+    }
+
+    /**
+     * @param mixed $aliquotaServicos
+     */
+    public function setAliquotaServicos($aliquotaServicos)
+    {
+        $this->aliquotaServicos = $aliquotaServicos;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIssRetido()
+    {
+        return $this->issRetido;
+    }
+
+    /**
+     * @param mixed $issRetido
+     */
+    public function setIssRetido($issRetido)
+    {
+        $this->issRetido = $issRetido;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInscricaoMunicipalTomador()
+    {
+        return $this->inscricaoMunicipalTomador;
+    }
+
+    /**
+     * @param mixed $inscricaoMunicipalTomador
+     */
+    public function setInscricaoMunicipalTomador($inscricaoMunicipalTomador)
+    {
+        $this->inscricaoMunicipalTomador = sprintf('%08s', $inscricaoMunicipalTomador);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInscricaoEstadualTomador()
+    {
+        return $this->inscricaoEstadualTomador;
+    }
+
+    /**
+     * @param mixed $inscricaoEstadualTomador
+     */
+    public function setInscricaoEstadualTomador($inscricaoEstadualTomador)
+    {
+
+        $this->inscricaoEstadualTomador = substr(General::onlyNumbers($inscricaoEstadualTomador), 0, 19);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRazaoSocialTomador()
+    {
+        return $this->razaoSocialTomador;
+    }
+
+    /**
+     * @param mixed $razaoSocialTomador
+     */
+    public function setRazaoSocialTomador($razaoSocialTomador)
+    {
+        $this->razaoSocialTomador = General::filterString(substr($razaoSocialTomador, 0, 75));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEmailTomador()
+    {
+        return $this->emailTomador;
+    }
+
+    /**
+     * @param mixed $emailTomador
+     */
+    public function setEmailTomador($emailTomador)
+    {
+        $this->emailTomador = substr($emailTomador, 0, 74);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDiscriminacao()
+    {
+        return $this->discriminacao;
+    }
+
+    /**
+     * @param mixed $discriminacao
+     */
+    public function setDiscriminacao($discriminacao)
+    {
+        $this->discriminacao = substr($discriminacao, 0, 2000);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCpfCnpjTomador()
+    {
+        return $this->cpfCnpjTomador;
+    }
+
+    /**
+     * @param mixed $cpfCnpjTomador
+     */
+    public function setCpfCnpjTomador($cpfCnpjTomador)
+    {
+        $this->cpfCnpjTomador = $cpfCnpjTomador;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCpfIntermediario()
+    {
+        return $this->cpfIntermediario;
+    }
+
+    /**
+     * @param mixed $cpfIntermediario
+     */
+    public function setCpfIntermediario($cpfIntermediario)
+    {
+        $this->cpfIntermediario = sprintf('%011s', General::onlyNumbers($cpfIntermediario));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInscricaoMunicipalIntermediario()
+    {
+        return $this->inscricaoMunicipalIntermediario;
+    }
+
+    /**
+     * @param mixed $inscricaoMunicipalIntermediario
+     */
+    public function setInscricaoMunicipalIntermediario($inscricaoMunicipalIntermediario)
+    {
+        $this->inscricaoMunicipalIntermediario = sprintf('%08s', $inscricaoMunicipalIntermediario);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIssRetidoIntermediario()
+    {
+        return $this->issRetidoIntermediario;
+    }
+
+    /**
+     * @param mixed $issRetidoIntermediario
+     */
+    public function setIssRetidoIntermediario($issRetidoIntermediario)
+    {
+        $this->issRetidoIntermediario = $issRetidoIntermediario;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEmailIntermediario()
+    {
+        return $this->emailIntermediario;
+    }
+
+    /**
+     * @param mixed $emailIntermediario
+     */
+    public function setEmailIntermediario($emailIntermediario)
+    {
+        $this->emailIntermediario = substr($emailIntermediario, 0, 75);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorCargaTributaria()
+    {
+        return $this->valorCargaTributaria;
+    }
+
+    /**
+     * @param mixed $valorCargaTributaria
+     */
+    public function setValorCargaTributaria($valorCargaTributaria)
+    {
+        $this->valorCargaTributaria = $valorCargaTributaria;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPercentualCargaTributaria()
+    {
+        return $this->percentualCargaTributaria;
+    }
+
+    /**
+     * @param mixed $percentualCargaTributaria
+     */
+    public function setPercentualCargaTributaria($percentualCargaTributaria)
+    {
+        $this->percentualCargaTributaria = $percentualCargaTributaria;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFonteCargaTributaria()
+    {
+        return $this->fonteCargaTributaria;
+    }
+
+    /**
+     * @param mixed $fonteCargaTributaria
+     */
+    public function setFonteCargaTributaria($fonteCargaTributaria)
+    {
+        $this->fonteCargaTributaria = substr($fonteCargaTributaria, 0, 10);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCodigoCEI()
+    {
+        return $this->codigoCEI;
+    }
+
+    /**
+     * @param mixed $codigoCEI
+     */
+    public function setCodigoCEI($codigoCEI)
+    {
+        $this->codigoCEI = General::onlyNumbers($codigoCEI);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMatriculaObra()
+    {
+        return $this->matriculaObra;
+    }
+
+    /**
+     * @param mixed $matriculaObra
+     */
+    public function setMatriculaObra($matriculaObra)
+    {
+        $this->matriculaObra = General::onlyNumbers($matriculaObra);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMunicipioPrestacao()
+    {
+        return $this->municipioPrestacao;
+    }
+
+    /**
+     * @param mixed $municipioPrestacao
+     */
+    public function setMunicipioPrestacao($municipioPrestacao)
+    {
+        $this->municipioPrestacao = sprintf('%07s', General::onlyNumbers($municipioPrestacao));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValortotalRecebido()
+    {
+        return $this->valortotalRecebido;
+    }
+
+    /**
+     * @param mixed $valortotalRecebido
+     */
+    public function setValortotalRecebido($valortotalRecebido)
+    {
+        $this->valortotalRecebido = General::filterMonetaryValue($valortotalRecebido);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNumeroEncapsulamento()
+    {
+        return $this->numeroEncapsulamento;
+    }
+
+    /**
+     * @param mixed $numeroEncapsulamento
+     */
+    public function setNumeroEncapsulamento($numeroEncapsulamento)
+    {
+        $this->numeroEncapsulamento = General::onlyNumbers($numeroEncapsulamento);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTipoLogradouro()
+    {
+        return $this->tipoLogradouro;
+    }
+
+    /**
+     * @param mixed $tipoLogradouro
+     */
+    public function setTipoLogradouro($tipoLogradouro)
+    {
+        $this->tipoLogradouro = General::filterString(substr($tipoLogradouro, 0, 3));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogradouro()
+    {
+        return $this->logradouro;
+    }
+
+    /**
+     * @param mixed $logradouro
+     */
+    public function setLogradouro($logradouro)
+    {
+        $this->logradouro = General::filterString(substr($logradouro, 0, 50));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNumeroEndereco()
+    {
+        return $this->numeroEndereco;
+    }
+
+    /**
+     * @param mixed $numeroEndereco
+     */
+    public function setNumeroEndereco($numeroEndereco)
+    {
+        $this->numeroEndereco = General::onlyNumbers($numeroEndereco);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getComplementoEndereco()
+    {
+        return $this->complementoEndereco;
+    }
+
+    /**
+     * @param mixed $complementoEndereco
+     */
+    public function setComplementoEndereco($complementoEndereco)
+    {
+        $this->complementoEndereco = General::filterString(substr($complementoEndereco, 0, 30));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBairro()
+    {
+        return $this->bairro;
+    }
+
+    /**
+     * @param mixed $bairro
+     */
+    public function setBairro($bairro)
+    {
+        $this->bairro = General::filterString(substr($bairro, 0, 30));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCidade()
+    {
+        return $this->cidade;
+    }
+
+    /**
+     * @param mixed $cidade
+     */
+    public function setCidade($cidade)
+    {
+
+        $this->cidade = sprintf('%07s', General::onlyNumbers($cidade));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUf()
+    {
+        return $this->uf;
+    }
+
+    /**
+     * @param mixed $uf
+     */
+    public function setUf($uf)
+    {
+        $this->uf = strtoupper(substr($uf, 0, 2));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCep()
+    {
+        return $this->cep;
+    }
+
+    /**
+     * @param mixed $cep
+     */
+    public function setCep($cep)
+    {
+        $this->cep = sprintf('%08s', General::onlyNumbers($cep));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorFinalCobrado()
+    {
+        return $this->valorFinalCobrado;
+    }
+
+    /**
+     * @param mixed $ValorFinalCobrado
+     */
+    public function setValorFinalCobrado($valorFinalCobrado)
+    {
+        $this->valorFinalCobrado = General::filterMonetaryValue($valorFinalCobrado);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getExigibilidadeSuspensa()
+    {
+        return $this->exigibilidadeSuspensa;
+    }
+
+    /**
+     * @param mixed $exigibilidadeSuspensa
+     */
+    public function setExigibilidadeSuspensa($exigibilidadeSuspensa)
+    {
+        $this->exigibilidadeSuspensa = $exigibilidadeSuspensa;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPagamentoParceladoAntecipado()
+    {
+        return $this->pagamentoParceladoAntecipado;
+    }
+
+    /**
+     * @param mixed $pagamentoParceladoAntecipado
+     */
+    public function setPagamentoParceladoAntecipado($pagamentoParceladoAntecipado)
+    {
+        $this->pagamentoParceladoAntecipado = $pagamentoParceladoAntecipado;
+    }
+    /**
+     * @return mixed
+     */
+    public function getNbs()
+    {
+        return $this->nbsField;
+    }
+
+    /**
+     * @param mixed $nbsField
+     */
+    public function setNbs($nbsField)
+    {
+        $this->nbsField = $nbsField;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getLocPrestacao()
+    {
+        return $this->locPrestacao;
+    }
+
+    /**
+     * @param mixed $locPrestacao
+     */
+    public function setlocPrestacao($locPrestacao)
+    {
+        $this->locPrestacao = $locPrestacao;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorMulta()
+    {
+        return $this->valorMulta;
+    }
+
+    /**
+     * @param mixed $valorPIS
+     */
+    public function setValorMulta($valorMulta)
+    {
+        $this->valorMulta = General::filterMonetaryValue($valorMulta);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorJuros()
+    {
+        return $this->valorJuros;
+    }
+
+    /**
+     * @param mixed $valorPIS
+     */
+    public function setValorJuros($valorJuros)
+    {
+        $this->valorJuros = General::filterMonetaryValue($valorJuros);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValorIPI()
+    {
+        return $this->valorIPI;
+    }
+
+    /**
+     * @param mixed $valorIPI
+     */
+    public function setValorIPI($valorIPI)
+    {
+        $this->valorIPI = General::filterMonetaryValue($valorIPI);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClassTrib()
+    {
+        return $this->classTrib;
+    }
+
+    /**
+     * @param mixed $classTrib
+     */
+    public function setClassTrib($classTrib)
+    {
+        $this->classTrib = $classTrib;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFinNfse()
+    {
+        return $this->finNfse;
+    }
+
+    /**
+     * @param mixed $classTrib
+     */
+    public function setFinNfse($finNfse)
+    {
+        $this->finNfse = $finNfse;
+    }
+    /**
+     * @return mixed
+     */
+    public function getIndFinal()
+    {
+        return $this->indFinal;
+    }
+
+    /**
+     * @param mixed $classTrib
+     */
+    public function setIndFinal($indFinal)
+    {
+        $this->indFinal = $indFinal;
+    }
+    /**
+     * @return mixed
+     */
+    public function getIndOp()
+    {
+        return $this->indOp;
+    }
+
+    /**
+     * @param mixed $indOp
+     */
+    public function setIndOp($indOp)
+    {
+        $this->indOp = sprintf('%06s', $indOp);
+    }
+    /**
+     * @return mixed
+     */
+    public function getTpOper()
+    {
+        return $this->tpOper;
+    }
+
+    /**
+     * @param mixed $tpOper
+     */
+    public function setTpOper($tpOper)
+    {
+        $this->tpOper = $tpOper;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTpEnteGov()
+    {
+        return $this->tpEnteGov;
+    }
+
+    /**
+     * @param mixed $classTrib
+     */
+    public function setTpEnteGov($tpEnteGov)
+    {
+        $this->tpEnteGov = $tpEnteGov;
+    }
+    /**
+     * @return mixed
+     */
+    public function getIndDest()
+    {
+        return $this->indDest;
+    }
+
+    /**
+     * @param mixed $indDest
+     */
+    public function setIndDest($indDest)
+    {
+        $this->indDest = $indDest;
+    }
+
+}

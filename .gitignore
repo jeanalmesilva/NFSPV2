@@ -1,0 +1,10 @@
+/vendor/
+/.idea/
+/examples/certificate.pfx
+/examples/test.php
+composer.lock
+/.env
+/exemplos/xmls/*.xml
+/exemplos/xmls/*.XML
+/exemplos/xmls/*.zip
+/exemplos/xmls/*.ZIP
