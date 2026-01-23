@@ -155,9 +155,17 @@ abstract class NfAbstract implements InputTransformer
             if (isset($extraInformations[RpsEnum::DISCRIMINATION]))
                 $rps[RpsEnum::DISCRIMINATION] = $extraInformations[RpsEnum::DISCRIMINATION];
 
+            if (isset($extraInformations[RpsEnum::TAX_VALUE_INTERMEDIARY]) && !empty($extraInformations[RpsEnum::TAX_VALUE_INTERMEDIARY]))
+                $rps[RpsEnum::TAX_VALUE_INTERMEDIARY] = $extraInformations[RpsEnum::TAX_VALUE_INTERMEDIARY];
+
+            if (isset($extraInformations[RpsEnum::TAX_PERCENT_INTERMEDIARY]) && !empty($extraInformations[RpsEnum::TAX_PERCENT_INTERMEDIARY]))
+                $rps[RpsEnum::TAX_PERCENT_INTERMEDIARY] = $extraInformations[RpsEnum::TAX_PERCENT_INTERMEDIARY];
+
+            if (isset($extraInformations[RpsEnum::TAX_ORIGIN]) && !empty($extraInformations[RpsEnum::TAX_ORIGIN]))
+                $rps[RpsEnum::TAX_ORIGIN] = $extraInformations[RpsEnum::TAX_ORIGIN];
+
             if (isset($extraInformations[RpsEnum::SERVICE_TOTAL_RECEIVED]))
                 $rps[RpsEnum::SERVICE_TOTAL_RECEIVED] = $extraInformations[RpsEnum::SERVICE_TOTAL_RECEIVED];
-
 
             if (isset($extraInformations[RpsEnum::SERVICE_INITIAL_CHARGED]))
                 $rps[RpsEnum::SERVICE_INITIAL_CHARGED] = $extraInformations[RpsEnum::SERVICE_INITIAL_CHARGED];
@@ -171,13 +179,14 @@ abstract class NfAbstract implements InputTransformer
                 $rps[RpsEnum::EXIGIBILIDADE_SUSPENSA] = $extraInformations[RpsEnum::EXIGIBILIDADE_SUSPENSA];
             if (isset($extraInformations[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO]))
                 $rps[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO] = $extraInformations[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO];
-            
+
             if (isset($extraInformations[RpsEnum::NCM_FIELD]))
                 $rps[RpsEnum::NCM_FIELD] = $extraInformations[RpsEnum::NCM_FIELD];
             if (isset($extraInformations[RpsEnum::NBS_FIELD]))
                 $rps[RpsEnum::NBS_FIELD] = $extraInformations[RpsEnum::NBS_FIELD];
             if (isset($extraInformations[RpsEnum::LOC_PRESTACAO]))
                 $rps[RpsEnum::LOC_PRESTACAO] = $extraInformations[RpsEnum::LOC_PRESTACAO];
+
             // Optional Fields
             if (isset($extraInformations[RpsEnum::CEI_CODE]) && !empty($extraInformations[RpsEnum::CEI_CODE]))
                 $rps[RpsEnum::CEI_CODE] = $extraInformations[RpsEnum::CEI_CODE];
@@ -191,15 +200,6 @@ abstract class NfAbstract implements InputTransformer
             if (isset($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]) && !empty($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]))
                 $rps[RpsEnum::ENCAPSULATION_NUMBER] = $extraInformations[RpsEnum::ENCAPSULATION_NUMBER];
 
-            if (isset($extraInformations[RpsEnum::TAX_VALUE_INTERMEDIARY]) && !empty($extraInformations[RpsEnum::TAX_VALUE_INTERMEDIARY]))
-                $rps[RpsEnum::TAX_VALUE_INTERMEDIARY] = $extraInformations[RpsEnum::TAX_VALUE_INTERMEDIARY];
-
-            if (isset($extraInformations[RpsEnum::TAX_PERCENT_INTERMEDIARY]) && !empty($extraInformations[RpsEnum::TAX_PERCENT_INTERMEDIARY]))
-                $rps[RpsEnum::TAX_PERCENT_INTERMEDIARY] = $extraInformations[RpsEnum::TAX_PERCENT_INTERMEDIARY];
-
-            if (isset($extraInformations[RpsEnum::TAX_ORIGIN]) && !empty($extraInformations[RpsEnum::TAX_ORIGIN]))
-                $rps[RpsEnum::TAX_ORIGIN] = $extraInformations[RpsEnum::TAX_ORIGIN];
-            
             $rps[ComplexFieldsEnum::IBSCBS] = $this->makeIbsCbs($extraInformations);
 
             $rpsItens[] = $rps;
@@ -219,7 +219,7 @@ abstract class NfAbstract implements InputTransformer
 
         return [SimpleFieldsEnum::CNPJ => null];
     }
-    
+
     private function makeAddress($extraInformations)
     {
         $address = [];
@@ -233,10 +233,13 @@ abstract class NfAbstract implements InputTransformer
     {
 
         foreach (RpsEnum::ibsCbsFields() as $field) {
-            if (!isset($extraInformations[$field])) {
-                throw new \Exception("Campo obrigatório {$field} para IBS/CBS não foi informado.");
-            }
-            $ibsCbs[$field] = $extraInformations[$field];
+//            if (!isset($extraInformations[$field])) {
+//                throw new \Exception("Campo obrigatório {$field} para IBS/CBS não foi informado.");
+//            }
+//            $ibsCbs[$field] = $extraInformations[$field];
+
+            if (isset($extraInformations[$field]))
+                $ibsCbs[$field] = $extraInformations[$field];
         }
         $ibsCbs['valores'] = [
             'trib' => [
