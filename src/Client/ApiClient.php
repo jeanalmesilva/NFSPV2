@@ -12,12 +12,14 @@ class ApiClient
 {
     public static function send(WsdlBase $wsdlBase, $method, BaseInformation $baseInformation)
     {
+        $saveXml = false;
 
-            $dom = new \DOMDocument('1.0', 'UTF-8');
-            $dom->preserveWhiteSpace = false;
-            $dom->formatOutput = true;
-            $dom->loadXML($baseInformation->getXml());
-            $dom->save('./'.date('YmdHis') . '_request.xml');
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML($baseInformation->getXml());
+        if ($saveXml) $dom->save('./' . date('YmdHis') . '_request.xml');
+
         $options = [
             'location' => $wsdlBase->getEndPoint(),
             'keep_alive' => true,
@@ -30,9 +32,6 @@ class ApiClient
         try {
             $client = new SoapClient($wsdlBase->getWsdl(), $options);
 
-
-
-
             $arguments = [
                 $method => [
                     'VersaoSchema' => 2,
@@ -43,7 +42,8 @@ class ApiClient
             $options = [];
             $result = $client->__soapCall($method, $arguments, $options);
             $dom->loadXML($result->RetornoXML);
-            $dom->save('./'.date('YmdHis') . '_response.xml');
+            if ($saveXml) $dom->save('./' . date('YmdHis') . '_response.xml');
+
             return $result->RetornoXML;
         } catch (Exception $e) {
             $response = new BasicResponse();
