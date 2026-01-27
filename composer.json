@@ -1,5 +1,5 @@
 {
-    "name": "dlhenke/notafiscalspv2",
+    "name": "jeanalmesilva/notafiscalspv2",
     "description": "Integração com o WebService da Prefeitura de Sao Paulo para emissao de NFS e NTFS utilizando a API da nota do milhao Versao 2",
     "type": "library",
     "license": "MIT",

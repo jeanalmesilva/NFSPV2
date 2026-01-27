@@ -14,11 +14,13 @@ class ApiClient
     {
         $saveXml = false;
 
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($baseInformation->getXml());
-        if ($saveXml) $dom->save('./' . date('YmdHis') . '_request.xml');
+        if ($saveXml) {
+            $dom = new \DOMDocument('1.0', 'UTF-8');
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput = true;
+            $dom->loadXML($baseInformation->getXml());
+            $dom->save('./' . date('YmdHis') . '_request.xml');
+        }
 
         $options = [
             'location' => $wsdlBase->getEndPoint(),
@@ -41,8 +43,11 @@ class ApiClient
 
             $options = [];
             $result = $client->__soapCall($method, $arguments, $options);
-            $dom->loadXML($result->RetornoXML);
-            if ($saveXml) $dom->save('./' . date('YmdHis') . '_response.xml');
+
+            if ($saveXml) {
+                $dom->loadXML($result->RetornoXML);
+                $dom->save('./' . date('YmdHis') . '_response.xml');
+            }
 
             return $result->RetornoXML;
         } catch (Exception $e) {
