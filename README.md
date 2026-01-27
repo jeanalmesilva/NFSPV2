@@ -2,7 +2,7 @@
 [![Latest Stable Version](https://poser.pugx.org/kaleu62/notafiscalsp/v/stable)](https://packagist.org/packages/kaleu62/notafiscalsp) [![Total Downloads](https://poser.pugx.org/kaleu62/notafiscalsp/downloads)](https://packagist.org/packages/kaleu62/notafiscalsp) [![License](https://poser.pugx.org/kaleu62/notafiscalsp/license)](https://packagist.org/packages/kaleu62/notafiscalsp)
 
 
-O Projeto se trata de um módulo de integração com o sistema de notas da Prefeitura de São Paulo (Nota do Milhão) Versão 2.0 (Reforma tributária obrigatoria a partir de 01-01-2016) , possibilitando a automatização de serviços como emissão e consulta de Notas e outros serviços relacionados.
+O Projeto se trata de um módulo de integração com o sistema de notas da Prefeitura de São Paulo (Nota do Milhão) Versão 2.0 (Reforma tributária obrigatoria a partir de 01-01-2026) , possibilitando a automatização de serviços como emissão e consulta de Notas e outros serviços relacionados.
 
 
 ### OBSERBAÇÂO -- NFST 
