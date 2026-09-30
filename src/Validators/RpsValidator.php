@@ -49,6 +49,12 @@ class RpsValidator
                 $item[RpsEnum::ISS_RETENTION] = BooleanFields::LOWER_FALSE;
             }
 
+            if (isset($item[RpsEnum::ISS_RETENTION_INTERMEDIARY])) {
+                $item[RpsEnum::ISS_RETENTION_INTERMEDIARY] = $item[RpsEnum::ISS_RETENTION_INTERMEDIARY]
+                    ? BooleanFields::LOWER_TRUE
+                    : BooleanFields::LOWER_FALSE;
+            }
+
             $item[ComplexFieldsEnum::RPS_KEY] = true;
             $item[DetailEnum::SIGN] = Certificate::rpsSignatureString($item);
             $rpsOK[] = $item;

@@ -86,38 +86,66 @@ class Certificate
 
     public static function rpsSignatureString($params)
     {
-        $document = General::getKey($params, SimpleFieldsEnum::CNPJ) ? General::getKey($params, SimpleFieldsEnum::CNPJ) : General::getKey($params, SimpleFieldsEnum::CPF);
-        //Required Fields
-       /* $string =
-            sprintf('%08s', General::getKey($params, SimpleFieldsEnum::IM_PROVIDER)) .
-            sprintf('%-5s', General::getKey($params, SimpleFieldsEnum::RPS_SERIES)) . // 5 chars
-            sprintf('%012s', General::getKey($params, SimpleFieldsEnum::RPS_NUMBER)) .
-            str_replace('-', '', General::getKey($params, RpsEnum::EMISSION_DATE)) .
-            General::getKey($params, RpsEnum::RPS_TAX) .
-            General::getKey($params, RpsEnum::RPS_STATUS) .
-            ($params[RpsEnum::ISS_RETENTION] == 'false' ? BooleanFields::FALSE : BooleanFields::TRUE) .
-            sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::SERVICE_FINAL_CHARGED), 2))) .
-            sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::DEDUCTION_VALUE), 2))) .
-            sprintf('%05s', General::getKey($params, RpsEnum::SERVICE_CODE)) .
-            ((General::getKey($params, SimpleFieldsEnum::CPF)) ? '1' : '2') .
-            sprintf('%014s', $document);*/
+        $valorCobrado = General::getKey($params, RpsEnum::SERVICE_FINAL_CHARGED);
+        if ($valorCobrado === null || $valorCobrado === '') {
+            $valorCobrado = General::getKey($params, RpsEnum::SERVICE_INITIAL_CHARGED);
+        }
 
-        // AVAILABLE ON RELEASE 2
+        $nifSuffix = '';
+        $nif = General::getKey($params, RpsEnum::NIF);
+        $naoNif = General::getKey($params, RpsEnum::NAO_NIF);
+
+        if ($nif) {
+            $tomadorIndicator = '4';
+            $document = '00000000000000';
+            $nifSuffix = $nif;
+        } elseif ($naoNif !== null && $naoNif !== '') {
+            $tomadorIndicator = '4';
+            $document = '00000000000000';
+            $nifSuffix = (string) $naoNif;
+        } elseif (General::getKey($params, SimpleFieldsEnum::CPF)) {
+            $tomadorIndicator = '1';
+            $document = sprintf('%014s', General::getKey($params, SimpleFieldsEnum::CPF));
+        } elseif (General::getKey($params, SimpleFieldsEnum::CNPJ)) {
+            $tomadorIndicator = '2';
+            $document = sprintf('%014s', General::getKey($params, SimpleFieldsEnum::CNPJ));
+        } else {
+            $tomadorIndicator = '3';
+            $document = '00000000000000';
+        }
+
+        $intermediarySuffix = '';
+        $cpfIntermediary = General::getKey($params, SimpleFieldsEnum::CPF_INTERMEDIARY);
+        $cnpjIntermediary = General::getKey($params, SimpleFieldsEnum::CNPJ_INTERMEDIARY);
+
+        if ($cpfIntermediary) {
+            $intermediarySuffix = '1' . sprintf('%014s', $cpfIntermediary);
+        } elseif ($cnpjIntermediary) {
+            $intermediarySuffix = '2' . sprintf('%014s', $cnpjIntermediary);
+        }
+
+        if ($intermediarySuffix !== '') {
+            $issRetidoIntermediary = General::getKey($params, RpsEnum::ISS_RETENTION_INTERMEDIARY);
+            $intermediarySuffix .= ($issRetidoIntermediary === true || $issRetidoIntermediary === 'true' || $issRetidoIntermediary === BooleanFields::TRUE)
+                ? BooleanFields::TRUE
+                : BooleanFields::FALSE;
+        }
 
         $string =
             sprintf('%012s', General::getKey($params, SimpleFieldsEnum::IM_PROVIDER)) .
-            sprintf('%-5s', General::getKey($params, SimpleFieldsEnum::RPS_SERIES)) . // 5 chars
+            sprintf('%-5s', General::getKey($params, SimpleFieldsEnum::RPS_SERIES)) .
             sprintf('%012s', General::getKey($params, SimpleFieldsEnum::RPS_NUMBER)) .
             str_replace('-', '', General::getKey($params, RpsEnum::EMISSION_DATE)) .
             General::getKey($params, RpsEnum::RPS_TAX) .
             General::getKey($params, RpsEnum::RPS_STATUS) .
             ($params[RpsEnum::ISS_RETENTION] == 'false' ? BooleanFields::FALSE : BooleanFields::TRUE) .
-            sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::SERVICE_FINAL_CHARGED), 2))) .
-            sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::DEDUCTION_VALUE), 2))) .
+            sprintf('%015s', str_replace(array('.', ','), '', number_format((float) $valorCobrado, 2, '.', ''))) .
+            sprintf('%015s', str_replace(array('.', ','), '', number_format((float) General::getKey($params, RpsEnum::DEDUCTION_VALUE), 2, '.', ''))) .
             sprintf('%05s', General::getKey($params, RpsEnum::SERVICE_CODE)) .
-            ((General::getKey($params, SimpleFieldsEnum::CPF)) ? '1' : '2') .
-            
-            sprintf('%014s', $document);
+            $tomadorIndicator .
+            $document .
+            $intermediarySuffix .
+            $nifSuffix;
 
         return $string;
     }

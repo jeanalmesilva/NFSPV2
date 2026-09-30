@@ -172,20 +172,48 @@ abstract class NfAbstract implements InputTransformer
 
             if (isset($extraInformations[RpsEnum::SERVICE_FINAL_CHARGED]))
                 $rps[RpsEnum::SERVICE_FINAL_CHARGED] = $extraInformations[RpsEnum::SERVICE_FINAL_CHARGED];
+
+            if (isset($extraInformations[RpsEnum::MULTA_VALUE]))
+                $rps[RpsEnum::MULTA_VALUE] = $extraInformations[RpsEnum::MULTA_VALUE];
+
+            if (isset($extraInformations[RpsEnum::JUROS_VALUE]))
+                $rps[RpsEnum::JUROS_VALUE] = $extraInformations[RpsEnum::JUROS_VALUE];
+
             if (isset($extraInformations[RpsEnum::IPI_VALUE]))
                 $rps[RpsEnum::IPI_VALUE] = $extraInformations[RpsEnum::IPI_VALUE];
 
             if (isset($extraInformations[RpsEnum::EXIGIBILIDADE_SUSPENSA]))
                 $rps[RpsEnum::EXIGIBILIDADE_SUSPENSA] = $extraInformations[RpsEnum::EXIGIBILIDADE_SUSPENSA];
+
             if (isset($extraInformations[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO]))
                 $rps[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO] = $extraInformations[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO];
 
+            if (isset($extraInformations[RpsEnum::RETENCAO_PIS_COFINS]))
+                $rps[RpsEnum::RETENCAO_PIS_COFINS] = $extraInformations[RpsEnum::RETENCAO_PIS_COFINS];
+
             if (isset($extraInformations[RpsEnum::NCM_FIELD]))
                 $rps[RpsEnum::NCM_FIELD] = $extraInformations[RpsEnum::NCM_FIELD];
+
             if (isset($extraInformations[RpsEnum::NBS_FIELD]))
                 $rps[RpsEnum::NBS_FIELD] = $extraInformations[RpsEnum::NBS_FIELD];
+
             if (isset($extraInformations[RpsEnum::LOC_PRESTACAO]))
                 $rps[RpsEnum::LOC_PRESTACAO] = $extraInformations[RpsEnum::LOC_PRESTACAO];
+
+            if (isset($extraInformations[RpsEnum::C_PAIS_PRESTACAO]))
+                $rps[RpsEnum::C_PAIS_PRESTACAO] = $extraInformations[RpsEnum::C_PAIS_PRESTACAO];
+
+            if (isset($extraInformations[RpsEnum::ATV_EVENTO]))
+                $rps[RpsEnum::ATV_EVENTO] = $extraInformations[RpsEnum::ATV_EVENTO];
+
+            if ($this->hasIntermediary($extraInformations)) {
+                $rps[RpsEnum::CPFCNPJ_INTERMEDIARY] = $this->makeCPFCNPJIntermediary($extraInformations);
+
+                foreach ([RpsEnum::IM_INTERMEDIARY, RpsEnum::ISS_RETENTION_INTERMEDIARY, RpsEnum::EMAIL_INTERMEDIARY] as $field) {
+                    if (isset($extraInformations[$field]))
+                        $rps[$field] = $extraInformations[$field];
+                }
+            }
 
             // Optional Fields
             if (isset($extraInformations[RpsEnum::CEI_CODE]) && !empty($extraInformations[RpsEnum::CEI_CODE]))
@@ -200,7 +228,9 @@ abstract class NfAbstract implements InputTransformer
             if (isset($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]) && !empty($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]))
                 $rps[RpsEnum::ENCAPSULATION_NUMBER] = $extraInformations[RpsEnum::ENCAPSULATION_NUMBER];
 
-            $rps[ComplexFieldsEnum::IBSCBS] = $this->makeIbsCbs($extraInformations);
+            $ibsCbs = $this->makeIbsCbs($extraInformations);
+            if (!empty($ibsCbs))
+                $rps[ComplexFieldsEnum::IBSCBS] = $ibsCbs;
 
             $rpsItens[] = $rps;
         }
@@ -211,6 +241,12 @@ abstract class NfAbstract implements InputTransformer
 
     private function makeCPFCNPJTaker($extraInformations)
     {
+        if (isset($extraInformations[RpsEnum::NIF]))
+            return [RpsEnum::NIF => $extraInformations[RpsEnum::NIF]];
+
+        if (isset($extraInformations[RpsEnum::NAO_NIF]))
+            return [RpsEnum::NAO_NIF => $extraInformations[RpsEnum::NAO_NIF]];
+
         if (isset($extraInformations[SimpleFieldsEnum::CPF]))
             return [SimpleFieldsEnum::CPF => $extraInformations[SimpleFieldsEnum::CPF]];
 
@@ -218,6 +254,24 @@ abstract class NfAbstract implements InputTransformer
             return [SimpleFieldsEnum::CNPJ => $extraInformations[SimpleFieldsEnum::CNPJ]];
 
         return [SimpleFieldsEnum::CNPJ => null];
+    }
+
+    private function makeCPFCNPJIntermediary($extraInformations)
+    {
+        if (isset($extraInformations[SimpleFieldsEnum::CPF_INTERMEDIARY]))
+            return [SimpleFieldsEnum::CPF => $extraInformations[SimpleFieldsEnum::CPF_INTERMEDIARY]];
+
+        if (isset($extraInformations[SimpleFieldsEnum::CNPJ_INTERMEDIARY]))
+            return [SimpleFieldsEnum::CNPJ => $extraInformations[SimpleFieldsEnum::CNPJ_INTERMEDIARY]];
+
+        return [SimpleFieldsEnum::CNPJ => $extraInformations[RpsEnum::CPFCNPJ_INTERMEDIARY]];
+    }
+
+    private function hasIntermediary($extraInformations)
+    {
+        return isset($extraInformations[SimpleFieldsEnum::CPF_INTERMEDIARY])
+            || isset($extraInformations[SimpleFieldsEnum::CNPJ_INTERMEDIARY])
+            || isset($extraInformations[RpsEnum::CPFCNPJ_INTERMEDIARY]);
     }
 
     private function makeAddress($extraInformations)
@@ -229,25 +283,39 @@ abstract class NfAbstract implements InputTransformer
         }
         return $address;
     }
-    private function  makeIbsCbs($extraInformations)
+    private function makeIbsCbs($extraInformations)
     {
+        $ibsCbs = [];
 
-        foreach (RpsEnum::ibsCbsFields() as $field) {
-//            if (!isset($extraInformations[$field])) {
-//                throw new \Exception("Campo obrigatório {$field} para IBS/CBS não foi informado.");
-//            }
-//            $ibsCbs[$field] = $extraInformations[$field];
-
+        foreach (RpsEnum::ibscbsFields() as $field) {
             if (isset($extraInformations[$field]))
                 $ibsCbs[$field] = $extraInformations[$field];
         }
-        $ibsCbs['valores'] = [
-            'trib' => [
+
+        if (isset($extraInformations[RpsEnum::DEST]))
+            $ibsCbs[RpsEnum::DEST] = $extraInformations[RpsEnum::DEST];
+
+        if (isset($extraInformations[RpsEnum::G_REF_NFSE]))
+            $ibsCbs[RpsEnum::G_REF_NFSE] = $extraInformations[RpsEnum::G_REF_NFSE];
+
+        if (isset($extraInformations[RpsEnum::IMOVEL_OBRA]))
+            $ibsCbs[RpsEnum::IMOVEL_OBRA] = $extraInformations[RpsEnum::IMOVEL_OBRA];
+
+        $valores = [];
+
+        if (isset($extraInformations[RpsEnum::VALORES]))
+            $valores = $extraInformations[RpsEnum::VALORES];
+
+        if (isset($extraInformations[RpsEnum::CLASS_TRIB])) {
+            $valores['trib'] = [
                 'gIBSCBS' => [
                     RpsEnum::CLASS_TRIB => $extraInformations[RpsEnum::CLASS_TRIB],
                 ]
-            ]
-        ];
+            ];
+        }
+
+        if (!empty($valores))
+            $ibsCbs[RpsEnum::VALORES] = $valores;
 
         return $ibsCbs;
     }

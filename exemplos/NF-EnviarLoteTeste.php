@@ -46,12 +46,30 @@ $rps->setPagamentoParceladoAntecipado(0); // 0 - Não | 1 - Sim
 $rps->setNbs("115029000");
 $rps->setlocPrestacao('3550308');
 $rps->setClassTrib('200028');//410999
-$rps->setFinNFSe(0);
+$rps->setFinNfse(0);
 $rps->setIndFinal(0);
 $rps->setIndOp('100301');
 $rps->setTpOper(5);
 $rps->setTpEnteGov(1);
 $rps->setIndDest(1);
+$rps->setRetencaoPisCofins(0); // 0 = PIS/COFINS/CSLL não retidos (manual 3.3.8)
+$rps->setIbscbsDest([
+    'CNPJ' => 'J0CM5ZAU000106',
+    'xNome' => 'NOME TESTE DESTINATARIO',
+    // tpEnderecoIBSCBS: endNac (ou endExt) + xLgr/nro/xBairro
+    'end' => \NFSPV2\Helpers\IbscbsAddress::makeEndNac(
+        '3550308',
+        '01415000',
+        'Rua Teste Destinatario',
+        '100',
+        'Centro',
+        'Sala 1'
+    ),
+]);
+// Opcional — imóvel/obra usa tpEnderecoSimplesIBSCBS (CEP ou endExt, sem endNac):
+// $rps->setIbscbsImovelObra([
+//     'end' => \NFSPV2\Helpers\IbscbsAddress::makeEndSimples('01415000', 'Rua da Obra', '50', 'Bela Vista'),
+// ]);
 
 // Monte o Objeto do Lote
 $lot = new Lot();

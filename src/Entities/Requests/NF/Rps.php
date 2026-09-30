@@ -10,6 +10,7 @@ use NFSPV2\Constants\Requests\SimpleFieldsEnum;
 use NFSPV2\Contracts\UserRequest;
 use NFSPV2\Exceptions\InvalidParam;
 use NFSPV2\Helpers\General;
+use NFSPV2\Helpers\IbscbsAddress;
 use NFSPV2\Validators\RpsValidator;
 
 class Rps implements UserRequest
@@ -77,6 +78,15 @@ class Rps implements UserRequest
     private $tpOper;
     private $tpEnteGov;
     private $indDest;
+    private $retencaoPisCofins;
+    private $cPaisPrestacao;
+    private $nif;
+    private $naoNif;
+    private $ibscbsDest;
+    private $ibscbsImovelObra;
+    private $ibscbsReeRepRes;
+    private $ibscbsRefNFSe;
+    private $atvEvento;
 
     public function __construct()
     {
@@ -120,9 +130,9 @@ class Rps implements UserRequest
             RpsEnum::RPS_TAX => $this->tributacaoRps,
             RpsEnum::DEDUCTION_VALUE => $this->valorDeducoes,
             RpsEnum::PIS_VALUE => $this->valorPIS,
-            RpsEnum::MULTA_VALUE => $this->valorPIS,
-            RpsEnum::JUROS_VALUE => $this->valorPIS,
-            RpsEnum::IPI_VALUE => $this->valorPIS,
+            RpsEnum::MULTA_VALUE => $this->valorMulta,
+            RpsEnum::JUROS_VALUE => $this->valorJuros,
+            RpsEnum::IPI_VALUE => $this->valorIPI,
             RpsEnum::COFINS_VALUE => $this->valorCOFINS,
             RpsEnum::INSS_VALUE => $this->valorINSS,
             RpsEnum::IR_VALUE => $this->valorIR,
@@ -131,7 +141,6 @@ class Rps implements UserRequest
             RpsEnum::SERVICE_TAX => $this->aliquotaServicos,
             RpsEnum::ISS_RETENTION => $this->issRetido,
             RpsEnum::DISCRIMINATION => $this->discriminacao,
-            RpsEnum::CPFCNPJ_INTERMEDIARY => $this->cpfIntermediario,
             RpsEnum::IM_INTERMEDIARY => $this->inscricaoMunicipalIntermediario,
             RpsEnum::ISS_RETENTION_INTERMEDIARY => $this->issRetidoIntermediario,
             RpsEnum::EMAIL_INTERMEDIARY => $this->emailIntermediario,
@@ -163,7 +172,17 @@ class Rps implements UserRequest
             RpsEnum::TP_OPER => $this->tpOper,
             RpsEnum::TP_ENTE_GOV => $this->tpEnteGov,
             RpsEnum::IND_DEST => $this->indDest,
-
+            RpsEnum::RETENCAO_PIS_COFINS => $this->retencaoPisCofins,
+            RpsEnum::C_PAIS_PRESTACAO => $this->cPaisPrestacao,
+            RpsEnum::ATV_EVENTO => $this->atvEvento,
+            RpsEnum::NIF => $this->nif,
+            RpsEnum::NAO_NIF => $this->naoNif,
+            RpsEnum::DEST => $this->ibscbsDest,
+            RpsEnum::IMOVEL_OBRA => $this->ibscbsImovelObra,
+            RpsEnum::VALORES => $this->ibscbsReeRepRes,
+            RpsEnum::G_REF_NFSE => $this->ibscbsRefNFSe,
+            SimpleFieldsEnum::CPF_INTERMEDIARY => $this->cpfIntermediario,
+            SimpleFieldsEnum::CNPJ_INTERMEDIARY => $this->cnpjIntermediario,
 
             SimpleFieldsEnum::TYPE_ADDRESS => $this->tipoLogradouro,
             SimpleFieldsEnum::ADDRESS => $this->logradouro,
@@ -1123,6 +1142,106 @@ class Rps implements UserRequest
     public function setIndDest($indDest)
     {
         $this->indDest = $indDest;
+    }
+
+    public function getRetencaoPisCofins()
+    {
+        return $this->retencaoPisCofins;
+    }
+
+    public function setRetencaoPisCofins($retencaoPisCofins)
+    {
+        $this->retencaoPisCofins = $retencaoPisCofins;
+    }
+
+    public function getCPaisPrestacao()
+    {
+        return $this->cPaisPrestacao;
+    }
+
+    public function setCPaisPrestacao($cPaisPrestacao)
+    {
+        $this->cPaisPrestacao = $cPaisPrestacao;
+    }
+
+    public function getAtvEvento()
+    {
+        return $this->atvEvento;
+    }
+
+    public function setAtvEvento(array $atvEvento)
+    {
+        $this->atvEvento = IbscbsAddress::normalizeAtvEvento($atvEvento);
+    }
+
+    public function getNif()
+    {
+        return $this->nif;
+    }
+
+    public function setNif($nif)
+    {
+        $this->nif = substr($nif, 0, 40);
+    }
+
+    public function getNaoNif()
+    {
+        return $this->naoNif;
+    }
+
+    public function setNaoNif($naoNif)
+    {
+        $this->naoNif = $naoNif;
+    }
+
+    public function getIbscbsDest()
+    {
+        return $this->ibscbsDest;
+    }
+
+    public function setIbscbsDest(array $dest)
+    {
+        $this->ibscbsDest = IbscbsAddress::normalizePessoa($dest);
+    }
+
+    public function getIbscbsImovelObra()
+    {
+        return $this->ibscbsImovelObra;
+    }
+
+    public function setIbscbsImovelObra(array $imovelObra)
+    {
+        $this->ibscbsImovelObra = IbscbsAddress::normalizeImovelObra($imovelObra);
+    }
+
+    public function getIbscbsReeRepRes()
+    {
+        return $this->ibscbsReeRepRes;
+    }
+
+    public function setIbscbsReeRepRes(array $reeRepRes)
+    {
+        $this->ibscbsReeRepRes = $reeRepRes;
+    }
+
+    public function getIbscbsRefNFSe()
+    {
+        return $this->ibscbsRefNFSe;
+    }
+
+    public function setIbscbsRefNFSe(array $refNFSe)
+    {
+        $this->ibscbsRefNFSe = $refNFSe;
+    }
+
+    public function getValorInicialCobrado()
+    {
+        return $this->valorInicialCobrado;
+    }
+
+    public function setValorInicialCobrado($valorInicialCobrado)
+    {
+        $this->valorInicialCobrado = General::filterMonetaryValue($valorInicialCobrado);
     }
 
 }

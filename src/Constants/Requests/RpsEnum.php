@@ -56,6 +56,15 @@ class RpsEnum
     const TP_OPER = 'tpOper';
     const TP_ENTE_GOV  = 'tpEnteGov';
     const IND_DEST = 'indDest';
+    const RETENCAO_PIS_COFINS = 'RetencaoPisCofins';
+    const C_PAIS_PRESTACAO = 'cPaisPrestacao';
+    const ATV_EVENTO = 'atvEvento';
+    const NIF = 'NIF';
+    const NAO_NIF = 'NaoNIF';
+    const DEST = 'dest';
+    const IMOVEL_OBRA = 'imovelobra';
+    const G_REF_NFSE = 'gRefNFSe';
+    const VALORES = 'valores';
 
     public static function simpleTypes()
     {

@@ -2,7 +2,12 @@
 [![Latest Stable Version](https://poser.pugx.org/kaleu62/notafiscalsp/v/stable)](https://packagist.org/packages/kaleu62/notafiscalsp) [![Total Downloads](https://poser.pugx.org/kaleu62/notafiscalsp/downloads)](https://packagist.org/packages/kaleu62/notafiscalsp) [![License](https://poser.pugx.org/kaleu62/notafiscalsp/license)](https://packagist.org/packages/kaleu62/notafiscalsp)
 
 
-O Projeto se trata de um módulo de integração com o sistema de notas da Prefeitura de São Paulo (Nota do Milhão) Versão 2.0 (Reforma tributária obrigatoria a partir de 01-01-2026) , possibilitando a automatização de serviços como emissão e consulta de Notas e outros serviços relacionados.
+O Projeto se trata de um módulo de integração com o sistema de notas da Prefeitura de São Paulo (Nota do Milhão) **Layout versão 2** (Reforma tributária obrigatória a partir de 01-01-2026), conforme o **Manual de Utilização Web Service v3.3.8**, possibilitando a automatização de serviços como emissão e consulta de Notas e outros serviços relacionados.
+
+### Manual de referência
+- Manual NFS-e Web Service **v3.3.8** (Reforma Tributária 2026)
+- Schemas XSD: https://notadomilhao.sf.prefeitura.sp.gov.br/schemas-reformatributaria-v02-5 (Reforma tributária 2026 — página [Desenvolvedores](https://notadomilhao.sf.prefeitura.sp.gov.br/desenvolvedor/))
+- Web Service: https://nfews.prefeitura.sp.gov.br
 
 
 ### OBSERBAÇÂO -- NFST 
@@ -37,8 +42,14 @@ O Projeto se trata de um módulo de integração com o sistema de notas da Prefe
 - Na hora de emitir uma nota o campo de Cidade do Tomador é preenchido com o código do IBGE para a mesma, e ele pode ser consultado no site https://cidades.ibge.gov.br/brasil/sp/sao-paulo
 
 
-## Novos campos obrigatórios.
+## Novos campos obrigatórios (Layout v2 / Manual 3.3.8)
 - observe no diretório de exemplos o arquivo NF-EnviarLoteTeste.php
+- Campos IBS/CBS: `NBS`, `cLocPrestacao`, `cClassTrib`, `finNFSe`, `indFinal`, `cIndOp`, etc.
+- Campo `RetencaoPisCofins` (tipo `tpRetencaoPisCofins`) para tributos federais PIS/COFINS/CSLL — vigente desde a versão 3.3.7 do manual
+- `PagamentoParceladoAntecipado` passou a ser opcional no layout v2
+- Assinatura do RPS v2: utiliza `ValorInicialCobrado` ou `ValorFinalCobrado` (não existe mais `ValorServicos`)
+- Endereço do destinatário IBS/CBS (`dest/end`): tipo `tpEnderecoIBSCBS` — obrigatório choice `endNac` (cMun+CEP) **ou** `endExt`, mais `xLgr`, `nro`, `xBairro` (use `IbscbsAddress::makeEndNac()` / `makeEndExt()`)
+- Endereço de imóvel/obra e evento (`imovelobra/end`, `atvEvento/end`): tipo `tpEnderecoSimplesIBSCBS` — choice `CEP` **ou** `endExt` (sem `endNac`; use `IbscbsAddress::makeEndSimples()`)
 
   
 ## Instanciando a Classe
@@ -170,12 +181,25 @@ $rps->setPagamentoParceladoAntecipado(0); // 0 - Não | 1 - Sim
 $rps->setNbs("115029000");
 $rps->setlocPrestacao('3550308');
 $rps->setClassTrib('200028');//410999
-$rps->setFinNFSe(0);
+$rps->setFinNfse(0);
 $rps->setIndFinal(0);
 $rps->setIndOp('100301');
 $rps->setTpOper(5);
 $rps->setTpEnteGov(1);
 $rps->setIndDest(1);
+$rps->setRetencaoPisCofins(0);
+$rps->setIbscbsDest([
+    'CNPJ' => 'J0CM5ZAU000106',
+    'xNome' => 'NOME TESTE DESTINATARIO',
+    'end' => \NFSPV2\Helpers\IbscbsAddress::makeEndNac(
+        '3550308',
+        '01415000',
+        'Rua Teste Destinatario',
+        '100',
+        'Centro',
+        'Sala 1'
+    ),
+]);
 
 $response =  $nfSP->enviarNota($rps);
 ```
@@ -337,3 +361,16 @@ Objeto utilizado para emissão de novas notas
 |         MunicipioPrestacao        |        setMunicipioPrestacao()       |    string    |                              |
 |         ValortotalRecebido        |        setValortotalRecebido()       |     float    |                              |
 |        NumeroEncapsulamento       |       setNumeroEncapsulamento()      |      int     |                              |
+|         ValorMulta                |            setValorMulta()           |     float    |                              |
+|         ValorJuros                |            setValorJuros()           |     float    |                              |
+|           ValorIPI                |             setValorIPI()            |     float    |                              |
+|      RetencaoPisCofins            |       setRetencaoPisCofins()         |      int     | 0,3,4,5,6,7,8,9 (manual 3.3.8) |
+|       cPaisPrestacao              |         setCPaisPrestacao()          |    string    | Prestacao fora do Brasil       |
+|          atvEvento                |           setAtvEvento()             |    array     | Atividade de evento (end = CEP/endExt) |
+|         ibscbsDest                |          setIbscbsDest()             |    array     | Destinatario IBS/CBS (end = endNac/endExt) |
+|       ibscbsImovelObra            |       setIbscbsImovelObra()          |    array     | Imovel/obra IBS/CBS (end = CEP/endExt) |
+|        ibscbsReeRepRes            |       setIbscbsReeRepRes()           |    array     | Reembolso/repasse IBS/CBS    |
+|         ibscbsRefNFSe             |        setIbscbsRefNFSe()            |    array     | NFS-e referenciadas          |
+|              NIF                  |               setNif()               |    string    | Tomador estrangeiro          |
+|            NaoNIF                 |             setNaoNif()              |      int     | 0, 1 ou 2                    |
+|     ValorInicialCobrado           |      setValorInicialCobrado()        |     float    | Layout v2 (assinatura RPS)   |

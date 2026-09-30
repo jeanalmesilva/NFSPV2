@@ -58,6 +58,16 @@
 			<dest>
 				<CNPJ>J0CM5ZAU000106</CNPJ>
 				<xNome>NOME TESTE</xNome>
+				<end>
+					<endNac>
+						<cMun>3550308</cMun>
+						<CEP>01415000</CEP>
+					</endNac>
+					<xLgr>Rua Teste Destinatario</xLgr>
+					<nro>100</nro>
+					<xCpl>Sala 1</xCpl>
+					<xBairro>Centro</xBairro>
+				</end>
 			</dest>
 			<valores>
 				<gReeRepRes>
