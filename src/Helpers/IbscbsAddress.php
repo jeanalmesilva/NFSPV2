@@ -99,31 +99,37 @@ class IbscbsAddress
 
     /**
      * Normaliza dest / Adquirente / fornec (tpInformacoesPessoa).
+     * Ordem XSD: CPF|CNPJ|NIF|NaoNIF → xNome → end → email
      */
     public static function normalizePessoa(array $pessoa)
     {
-        if (isset($pessoa['end']) && is_array($pessoa['end'])) {
-            $pessoa['end'] = self::normalizeEndIbscbs($pessoa['end']);
-        } elseif (self::hasAddressHints($pessoa)) {
-            $pessoa['end'] = self::normalizeEndIbscbs(self::extractAddressHints($pessoa));
-            foreach (['endNac', 'endExt', 'cMun', 'CEP', 'cPais', 'cEndPost', 'xCidade', 'xEstProvReg', 'xLgr', 'nro', 'xCpl', 'xBairro'] as $key) {
-                unset($pessoa[$key]);
-            }
+        $normalized = [];
+
+        if (isset($pessoa['CPF'])) {
+            $normalized['CPF'] = sprintf('%011s', General::onlyNumbers($pessoa['CPF']));
+        } elseif (isset($pessoa['CNPJ'])) {
+            $normalized['CNPJ'] = General::regexCnpj($pessoa['CNPJ']);
+        } elseif (isset($pessoa['NIF'])) {
+            $normalized['NIF'] = substr((string)$pessoa['NIF'], 0, 40);
+        } elseif (isset($pessoa['NaoNIF'])) {
+            $normalized['NaoNIF'] = $pessoa['NaoNIF'];
         }
 
         if (isset($pessoa['xNome'])) {
-            $pessoa['xNome'] = General::filterString(substr($pessoa['xNome'], 0, 75));
+            $normalized['xNome'] = General::filterString(substr($pessoa['xNome'], 0, 75));
         }
 
-        if (isset($pessoa['CNPJ'])) {
-            $pessoa['CNPJ'] = General::regexCnpj($pessoa['CNPJ']);
+        if (isset($pessoa['end']) && is_array($pessoa['end'])) {
+            $normalized['end'] = self::normalizeEndIbscbs($pessoa['end']);
+        } elseif (self::hasAddressHints($pessoa)) {
+            $normalized['end'] = self::normalizeEndIbscbs(self::extractAddressHints($pessoa));
         }
 
-        if (isset($pessoa['CPF'])) {
-            $pessoa['CPF'] = sprintf('%011s', General::onlyNumbers($pessoa['CPF']));
+        if (isset($pessoa['email']) && $pessoa['email'] !== '') {
+            $normalized['email'] = substr((string)$pessoa['email'], 0, 75);
         }
 
-        return $pessoa;
+        return $normalized;
     }
 
     /**

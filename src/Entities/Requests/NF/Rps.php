@@ -96,6 +96,7 @@ class Rps implements UserRequest
         $this->setTributacaoRps(TaxType::IN_SP);
         $this->setValorDeducoes(0);
         $this->setValorFinalCobrado(0);
+        $this->setValorIPI(0);
         $this->setIssRetido(false);
         $this->setSerieRps('A');
         $this->setAliquotaServicos('0');
@@ -130,9 +131,6 @@ class Rps implements UserRequest
             RpsEnum::RPS_TAX => $this->tributacaoRps,
             RpsEnum::DEDUCTION_VALUE => $this->valorDeducoes,
             RpsEnum::PIS_VALUE => $this->valorPIS,
-            RpsEnum::MULTA_VALUE => $this->valorMulta,
-            RpsEnum::JUROS_VALUE => $this->valorJuros,
-            RpsEnum::IPI_VALUE => $this->valorIPI,
             RpsEnum::COFINS_VALUE => $this->valorCOFINS,
             RpsEnum::INSS_VALUE => $this->valorINSS,
             RpsEnum::IR_VALUE => $this->valorIR,
@@ -160,6 +158,9 @@ class Rps implements UserRequest
             RpsEnum::SERVICE_TOTAL_RECEIVED => $this->valorTotalRecebido,
             RpsEnum::SERVICE_INITIAL_CHARGED => $this->valorInicialCobrado,
             RpsEnum::SERVICE_FINAL_CHARGED => $this->valorFinalCobrado,
+            RpsEnum::MULTA_VALUE => $this->valorMulta,
+            RpsEnum::JUROS_VALUE => $this->valorJuros,
+            RpsEnum::IPI_VALUE => $this->valorIPI,
             RpsEnum::EXIGIBILIDADE_SUSPENSA => $this->exigibilidadeSuspensa,
             RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO => $this->pagamentoParceladoAntecipado,
             RpsEnum::NBS_FIELD => $this->nbsField,

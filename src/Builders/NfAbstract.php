@@ -152,6 +152,16 @@ abstract class NfAbstract implements InputTransformer
             if (isset($extraInformations[RpsEnum::EMAIL_TAKER]))
                 $rps[RpsEnum::EMAIL_TAKER] = $extraInformations[RpsEnum::EMAIL_TAKER];
 
+            // Intermediário vem antes da Discriminacao (tpRPS / XSD v02)
+            if ($this->hasIntermediary($extraInformations)) {
+                $rps[RpsEnum::CPFCNPJ_INTERMEDIARY] = $this->makeCPFCNPJIntermediary($extraInformations);
+
+                foreach ([RpsEnum::IM_INTERMEDIARY, RpsEnum::ISS_RETENTION_INTERMEDIARY, RpsEnum::EMAIL_INTERMEDIARY] as $field) {
+                    if (isset($extraInformations[$field]))
+                        $rps[$field] = $extraInformations[$field];
+                }
+            }
+
             if (isset($extraInformations[RpsEnum::DISCRIMINATION]))
                 $rps[RpsEnum::DISCRIMINATION] = $extraInformations[RpsEnum::DISCRIMINATION];
 
@@ -164,8 +174,24 @@ abstract class NfAbstract implements InputTransformer
             if (isset($extraInformations[RpsEnum::TAX_ORIGIN]) && !empty($extraInformations[RpsEnum::TAX_ORIGIN]))
                 $rps[RpsEnum::TAX_ORIGIN] = $extraInformations[RpsEnum::TAX_ORIGIN];
 
+            if (isset($extraInformations[RpsEnum::CEI_CODE]) && !empty($extraInformations[RpsEnum::CEI_CODE]))
+                $rps[RpsEnum::CEI_CODE] = $extraInformations[RpsEnum::CEI_CODE];
+
+            if (isset($extraInformations[RpsEnum::WORK_REGISTRATION]) && !empty($extraInformations[RpsEnum::WORK_REGISTRATION]))
+                $rps[RpsEnum::WORK_REGISTRATION] = $extraInformations[RpsEnum::WORK_REGISTRATION];
+
+            if (isset($extraInformations[RpsEnum::CITY_INSTALLMENT]) && !empty($extraInformations[RpsEnum::CITY_INSTALLMENT]))
+                $rps[RpsEnum::CITY_INSTALLMENT] = $extraInformations[RpsEnum::CITY_INSTALLMENT];
+
+            if (isset($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]) && !empty($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]))
+                $rps[RpsEnum::ENCAPSULATION_NUMBER] = $extraInformations[RpsEnum::ENCAPSULATION_NUMBER];
+
             if (isset($extraInformations[RpsEnum::SERVICE_TOTAL_RECEIVED]))
                 $rps[RpsEnum::SERVICE_TOTAL_RECEIVED] = $extraInformations[RpsEnum::SERVICE_TOTAL_RECEIVED];
+
+            // RetencaoPisCofins vem antes do ValorInicial/Final (XSD v02)
+            if (isset($extraInformations[RpsEnum::RETENCAO_PIS_COFINS]))
+                $rps[RpsEnum::RETENCAO_PIS_COFINS] = $extraInformations[RpsEnum::RETENCAO_PIS_COFINS];
 
             if (isset($extraInformations[RpsEnum::SERVICE_INITIAL_CHARGED]))
                 $rps[RpsEnum::SERVICE_INITIAL_CHARGED] = $extraInformations[RpsEnum::SERVICE_INITIAL_CHARGED];
@@ -179,17 +205,17 @@ abstract class NfAbstract implements InputTransformer
             if (isset($extraInformations[RpsEnum::JUROS_VALUE]))
                 $rps[RpsEnum::JUROS_VALUE] = $extraInformations[RpsEnum::JUROS_VALUE];
 
-            if (isset($extraInformations[RpsEnum::IPI_VALUE]))
-                $rps[RpsEnum::IPI_VALUE] = $extraInformations[RpsEnum::IPI_VALUE];
+            // ValorIPI e ExigibilidadeSuspensa são obrigatórios no layout v2
+            $rps[RpsEnum::IPI_VALUE] = isset($extraInformations[RpsEnum::IPI_VALUE])
+                ? $extraInformations[RpsEnum::IPI_VALUE]
+                : '0.00';
 
-            if (isset($extraInformations[RpsEnum::EXIGIBILIDADE_SUSPENSA]))
-                $rps[RpsEnum::EXIGIBILIDADE_SUSPENSA] = $extraInformations[RpsEnum::EXIGIBILIDADE_SUSPENSA];
+            $rps[RpsEnum::EXIGIBILIDADE_SUSPENSA] = isset($extraInformations[RpsEnum::EXIGIBILIDADE_SUSPENSA])
+                ? $extraInformations[RpsEnum::EXIGIBILIDADE_SUSPENSA]
+                : 0;
 
             if (isset($extraInformations[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO]))
                 $rps[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO] = $extraInformations[RpsEnum::PAGAMENTO_PARCELADO_ANTECIPADO];
-
-            if (isset($extraInformations[RpsEnum::RETENCAO_PIS_COFINS]))
-                $rps[RpsEnum::RETENCAO_PIS_COFINS] = $extraInformations[RpsEnum::RETENCAO_PIS_COFINS];
 
             if (isset($extraInformations[RpsEnum::NCM_FIELD]))
                 $rps[RpsEnum::NCM_FIELD] = $extraInformations[RpsEnum::NCM_FIELD];
@@ -197,36 +223,14 @@ abstract class NfAbstract implements InputTransformer
             if (isset($extraInformations[RpsEnum::NBS_FIELD]))
                 $rps[RpsEnum::NBS_FIELD] = $extraInformations[RpsEnum::NBS_FIELD];
 
+            if (isset($extraInformations[RpsEnum::ATV_EVENTO]))
+                $rps[RpsEnum::ATV_EVENTO] = $extraInformations[RpsEnum::ATV_EVENTO];
+
             if (isset($extraInformations[RpsEnum::LOC_PRESTACAO]))
                 $rps[RpsEnum::LOC_PRESTACAO] = $extraInformations[RpsEnum::LOC_PRESTACAO];
 
             if (isset($extraInformations[RpsEnum::C_PAIS_PRESTACAO]))
                 $rps[RpsEnum::C_PAIS_PRESTACAO] = $extraInformations[RpsEnum::C_PAIS_PRESTACAO];
-
-            if (isset($extraInformations[RpsEnum::ATV_EVENTO]))
-                $rps[RpsEnum::ATV_EVENTO] = $extraInformations[RpsEnum::ATV_EVENTO];
-
-            if ($this->hasIntermediary($extraInformations)) {
-                $rps[RpsEnum::CPFCNPJ_INTERMEDIARY] = $this->makeCPFCNPJIntermediary($extraInformations);
-
-                foreach ([RpsEnum::IM_INTERMEDIARY, RpsEnum::ISS_RETENTION_INTERMEDIARY, RpsEnum::EMAIL_INTERMEDIARY] as $field) {
-                    if (isset($extraInformations[$field]))
-                        $rps[$field] = $extraInformations[$field];
-                }
-            }
-
-            // Optional Fields
-            if (isset($extraInformations[RpsEnum::CEI_CODE]) && !empty($extraInformations[RpsEnum::CEI_CODE]))
-                $rps[RpsEnum::CEI_CODE] = $extraInformations[RpsEnum::CEI_CODE];
-
-            if (isset($extraInformations[RpsEnum::WORK_REGISTRATION]) && !empty($extraInformations[RpsEnum::WORK_REGISTRATION]))
-                $rps[RpsEnum::WORK_REGISTRATION] = $extraInformations[RpsEnum::WORK_REGISTRATION];
-
-            if (isset($extraInformations[RpsEnum::CITY_INSTALLMENT]) && !empty($extraInformations[RpsEnum::CITY_INSTALLMENT]))
-                $rps[RpsEnum::CITY_INSTALLMENT] = $extraInformations[RpsEnum::CITY_INSTALLMENT];
-
-            if (isset($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]) && !empty($extraInformations[RpsEnum::ENCAPSULATION_NUMBER]))
-                $rps[RpsEnum::ENCAPSULATION_NUMBER] = $extraInformations[RpsEnum::ENCAPSULATION_NUMBER];
 
             $ibsCbs = $this->makeIbsCbs($extraInformations);
             if (!empty($ibsCbs))
